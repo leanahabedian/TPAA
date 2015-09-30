@@ -12,7 +12,6 @@ try:
 except OSError:
     pass
 
-# URL for the Pima Indians Diabetes dataset (UCI Machine Learning Repository)
 # load the CSV file as a numpy matrix
 dataset = np.loadtxt(csv_filename, delimiter=";", skiprows=1)
 print(dataset.shape)
@@ -27,11 +26,18 @@ y = dataset[:,11]
 
 #print(clf.score(X,y))
 
-clf = tree.DecisionTreeClassifier(max_depth=3)
+clf = tree.DecisionTreeClassifier()
 clf = clf.fit(X,y)
-print (clf.tree_.node_count)
-print (clf.score(X,y))
 
-with open(result_filename, 'w') as f: f = tree.export_graphviz(clf, out_file=f)
+other_filename = "result2.csv"
+my_file = open(other_filename, 'w+')
+
+for i in range(1,1599):
+    clf = tree.DecisionTreeClassifier(max_depth=i).fit(X,y)
+    my_file.write(str(clf.tree_.node_count)+","+str(clf.score(X,y))+"\n")
+
+
+my_file.close()
+#with open(result_filename, 'w') as f: f = tree.export_graphviz(clf, out_file=f)
 
 
