@@ -5,10 +5,12 @@ import urllib
 import os
 
 csv_filename = "winequality-red.csv"
-result_filename = "result.dot"
+result_tree_filename = "original_tree.dot"
+result_csv_filename = "accuracy.csv"
 
 try:
-    os.remove(result_filename)
+    os.remove(result_tree_filename)
+    os.remove(result_csv_filename)
 except OSError:
     pass
 
@@ -19,25 +21,20 @@ print(dataset.shape)
 X = dataset[:,0:11]
 y = dataset[:,11]
 
-#clf = tree.DecisionTreeClassifier()
-#clf = clf.fit(X,y)
-
-#print(clf.tree_.node_count)
-
-#print(clf.score(X,y))
-
+# build tree without restrictions
 clf = tree.DecisionTreeClassifier()
 clf = clf.fit(X,y)
+with open(result_tree_filename, 'w') as f: f = tree.export_graphviz(clf, out_file=f)
 
-other_filename = "result2.csv"
-my_file = open(other_filename, 'w+')
+# build different trees depending on max_leaf_nodes
+result_csv_file = open(result_csv_filename, 'w+')
+node_count = clf.tree_.node_count
 
-for i in range(1,1599):
-    clf = tree.DecisionTreeClassifier(max_depth=i).fit(X,y)
-    my_file.write(str(clf.tree_.node_count)+","+str(clf.score(X,y))+"\n")
+for i in range(2,node_count):
+    clf = tree.DecisionTreeClassifier(max_leaf_nodes=i).fit(X,y)
+    result_csv_file.write(str(clf.tree_.node_count)+","+str(clf.score(X,y))+"\n")
 
+result_csv_file.close()
 
-my_file.close()
-#with open(result_filename, 'w') as f: f = tree.export_graphviz(clf, out_file=f)
 
 
