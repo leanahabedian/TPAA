@@ -1,7 +1,9 @@
 from sklearn import tree
 from sklearn import cross_validation
 import numpy as np
+import csv
 import os
+import matplotlib.pyplot as plt
 
 csv_filename = "winequality-red.csv"
 result_tree_filename = "original_tree.dot"
@@ -17,56 +19,107 @@ try:
 except OSError:
     pass
 
-# load the CSV file as a numpy matrix
-dataset = np.loadtxt(csv_filename, delimiter=";", skiprows=1)
-print(dataset.shape)
-# separate the data from the target attributes
-X = dataset[:,0:11]
-y = dataset[:,11]
+def load_data():
 
-# build tree without restrictions
-clf = tree.DecisionTreeClassifier()
-clf = clf.fit(X,y)
-with open(result_tree_filename, 'w') as f: f = tree.export_graphviz(clf, out_file=f)
+    # load the CSV file as a numpy matrix
+    dataset = np.loadtxt(csv_filename, delimiter=";", skiprows=1)
 
-# build different trees depending on max_leaf_nodes
-result_csv_file = open(result_csv_filename, 'w+')
+    # separate the data from the target attributes
+    X = dataset[:,0:11]
+    y = dataset[:,11]
+    return X, y
 
-for i in range(2,100):
-    clf = tree.DecisionTreeClassifier(max_leaf_nodes=i).fit(X,y)
-    result_csv_file.write(str(clf.tree_.node_count)+","+str(clf.score(X,y))+"\n")
+def build_different_trees(X, y):
+    # build tree without restrictions
+    clf = tree.DecisionTreeClassifier()
+    clf = clf.fit(X,y)
+    with open(result_tree_filename, 'w') as f: f = tree.export_graphviz(clf, out_file=f)
 
-result_csv_file.close()
+    # build different trees depending on max_leaf_nodes
+    result_csv_file = open(result_csv_filename, 'w+')
 
-# split dataset in train set and test set
-X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.3, random_state=0)
+    for i in range(2,100):
+        clf = tree.DecisionTreeClassifier(max_leaf_nodes=i).fit(X,y)
+        result_csv_file.write(str(clf.tree_.node_count)+","+str(clf.score(X,y))+"\n")
 
-# analyse performance while increasing the amount of leaf nodes
-result_performance_file = open(result_performance_filename, 'w+')
-result_performance_file.write("treeSize (#nodes), Train Score, Test Score\n")
+    result_csv_file.close()
 
-for i in range(2,100):
-    clf = tree.DecisionTreeClassifier(max_leaf_nodes=i).fit(X_train,y_train)
-    result_performance_file.write(str(clf.tree_.node_count)+","+str(clf.score(X_train,y_train))+","+str(clf.score(X_test,y_test))+"\n")
+def split_sample_in_train_and_test(X, y):
+    return  cross_validation.train_test_split(X, y, test_size=0.3, random_state=0)
 
-result_performance_file.close()
+def analyse_performance(X_train, X_test, y_train, y_test):
+    # initialize data and file
+    performanceX = []
+    performance_train = []
+    performance_test = []
+    result_performance_file = open(result_performance_filename, 'w+')
+    result_performance_file.write("Cantidad de nodos, Score de entrenamiento, Score de test\n")
+
+    for i in range(2,100):
+        clf = tree.DecisionTreeClassifier(max_leaf_nodes=i).fit(X_train,y_train)
+        performanceX.append(clf.tree_.node_count)
+        performance_train.append(clf.score(X_train,y_train))
+        performance_test.append(clf.score(X_test,y_test))
+        result_performance_file.write(str(clf.tree_.node_count)+","+str(clf.score(X_train,y_train))+","+str(clf.score(X_test,y_test))+"\n")
+
+    result_performance_file.close()
+    
+    # generate chart
+    plt.plot(performanceX, performance_train, '', performanceX, performance_test, '')
+    plt.title('performance')
+    plt.xlabel('cantidad de nodos')
+    plt.ylabel('score')
+    plt.legend(["score de entrenamiento","score de test"], loc="upper left")
+    plt.show()
 
 
-# analyse performance while increasing the amount of leaf nodes and with noisy samples
-result_noisy_file = open(result_noisy_filename, 'w+')
-result_noisy_file.write("treeSize (#nodes), Train Score, Test Score\n")
+def analyse_performance_with_noise(X_train, X_test, y_train, y_test):
 
-# adding noise to the sample
-noise_idx = np.random.random(y_train.shape)
-y_train_with_noise = y_train.copy()
-y_train_with_noise[noise_idx<0.3] = np.floor(y_train_with_noise[noise_idx<0.3] - 1) * (-1)
+    def make_graph(y_train_with_noise, percent):
+        for i in range(2,250):
+            clf = tree.DecisionTreeClassifier(max_leaf_nodes=i).fit(X_train,y_train_with_noise)
+            performanceX.append(clf.tree_.node_count)
+            performance_train.append(clf.score(X_train,y_train_with_noise))
+            performance_test.append(clf.score(X_test,y_test))
+#            result_noisy_file.write(str(clf.tree_.node_count)+","+str(clf.score(X_train,y_train_with_noise))+","+str(clf.score(X_test,y_test))+"\n")
+
+        result_noisy_file.close()
+
+        # generate chart
+        plt.plot(performanceX, performance_train, '', performanceX, performance_test, '')
+        plt.title('performance con '+percent+'% de ruido')
+        plt.xlabel('cantidad de nodos')
+        plt.ylabel('score')
+        plt.legend(["score de entrenamiento","score de test"], loc="upper left")
+        plt.show()
+        del performanceX[:]
+        del performance_train[:]
+        del performance_test[:]
 
 
-for i in range(2,100):
-    clf = tree.DecisionTreeClassifier(max_leaf_nodes=i).fit(X_train,y_train_with_noise)
-    result_noisy_file.write(str(clf.tree_.node_count)+","+str(clf.score(X_train,y_train_with_noise))+","+str(clf.score(X_test,y_test))+"\n")
+    # initialize data and file
+    performanceX = []
+    performance_train = []
+    performance_test = []
+    result_noisy_file = open(result_noisy_filename, 'w+')
+    result_noisy_file.write("Cantidad de nodos, Score de entrenamiento, Score de test 0% error, Score de test \n")
 
-result_noisy_file.close()
+    # adding noise to the sample
+    noise_idx = np.random.random(y_train.shape)
+    y_train_with_noise_10 = y_train.copy()
+    y_train_with_noise_30 = y_train.copy()
+    y_train_with_noise_50 = y_train.copy()
+    y_train_with_noise_10[noise_idx<0.1] = np.floor(y_train_with_noise_10[noise_idx<0.1] - 1) * (-1)
+    y_train_with_noise_30[noise_idx<0.3] = np.floor(y_train_with_noise_30[noise_idx<0.3] - 1) * (-1)
+    y_train_with_noise_50[noise_idx<0.5] = np.floor(y_train_with_noise_50[noise_idx<0.5] - 1) * (-1)
 
+    make_graph(y_train_with_noise_10, "10")
+    make_graph(y_train_with_noise_30, "30")
+    make_graph(y_train_with_noise_50, "50")
 
-
+if __name__ == "__main__":
+    X,y = load_data() 
+    build_different_trees(X,y) 
+    X_train, X_test, y_train, y_test = split_sample_in_train_and_test(X, y)
+    analyse_performance(X_train, X_test, y_train, y_test)
+    analyse_performance_with_noise(X_train, X_test, y_train, y_test)
