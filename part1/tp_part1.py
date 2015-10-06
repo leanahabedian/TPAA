@@ -9,13 +9,11 @@ csv_filename = "winequality-red.csv"
 result_tree_filename = "original_tree.dot"
 result_csv_filename = "accuracy.csv"
 result_performance_filename = "performance.csv"
-result_noisy_filename = "noisyPerformance.csv"
 
 try:
     os.remove(result_tree_filename)
     os.remove(result_csv_filename)
     os.remove(result_performance_filename)
-    os.remove(result_noisy_filename)
 except OSError:
     pass
 
@@ -45,6 +43,7 @@ def build_different_trees(X, y):
     result_csv_file.close()
 
 def split_sample_in_train_and_test(X, y):
+    # split 30% for test and 70% for train
     return  cross_validation.train_test_split(X, y, test_size=0.3, random_state=0)
 
 def analyse_performance(X_train, X_test, y_train, y_test):
@@ -81,9 +80,6 @@ def analyse_performance_with_noise(X_train, X_test, y_train, y_test):
             performanceX.append(clf.tree_.node_count)
             performance_train.append(clf.score(X_train,y_train_with_noise))
             performance_test.append(clf.score(X_test,y_test))
-#            result_noisy_file.write(str(clf.tree_.node_count)+","+str(clf.score(X_train,y_train_with_noise))+","+str(clf.score(X_test,y_test))+"\n")
-
-        result_noisy_file.close()
 
         # generate chart
         plt.plot(performanceX, performance_train, '', performanceX, performance_test, '')
@@ -101,8 +97,6 @@ def analyse_performance_with_noise(X_train, X_test, y_train, y_test):
     performanceX = []
     performance_train = []
     performance_test = []
-    result_noisy_file = open(result_noisy_filename, 'w+')
-    result_noisy_file.write("Cantidad de nodos, Score de entrenamiento, Score de test 0% error, Score de test \n")
 
     # adding noise to the sample
     noise_idx = np.random.random(y_train.shape)
@@ -118,6 +112,7 @@ def analyse_performance_with_noise(X_train, X_test, y_train, y_test):
     make_graph(y_train_with_noise_50, "50")
 
 if __name__ == "__main__":
+
     X,y = load_data() 
     build_different_trees(X,y) 
     X_train, X_test, y_train, y_test = split_sample_in_train_and_test(X, y)
