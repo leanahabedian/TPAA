@@ -165,18 +165,18 @@ if __name__ == "__main__":
     
     X, y = load_data()
     # k variation
-    #plot_knn(X, y, 'uniform',1)
-    #plot_knn(X, y, 'uniform',7)
-    #plot_knn(X, y, 'uniform',1599)
+    plot_knn(X, y, 'uniform',1)
+    plot_knn(X, y, 'uniform',7)
+    plot_knn(X, y, 'uniform',1599)
     # score over train
-    #analyze_score(X, y, X, y, 'uniform')
+    analyze_score(X, y, X, y, 'uniform')
 
     X_train, X_test, y_train, y_test = split_sample_in_train_and_test(X, y)
     # score over test 
-    # analyze_score(X_train, y_train, X_test, y_test, 'uniform')
+     analyze_score(X_train, y_train, X_test, y_test, 'uniform')
     # plot with distance
-    #plot_knn(X, y, 'distance',1599)
-    #analyze_score_all_weghts(X_train, y_train, X_test, y_test)
+    plot_knn(X, y, 'distance',1599)
+    analyze_score_all_weghts(X_train, y_train, X_test, y_test)
     # performance with noise
     analyse_performance_with_noise(X_train, X_test, y_train, y_test)   
    
