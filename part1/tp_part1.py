@@ -38,7 +38,7 @@ def analyze_base_tree(X, y):
     node_count = []
     score = []
 
-    #with open(result_tree_filename, 'w') as f: f = tree.export_graphviz(clf, out_file=f)
+    with open(result_tree_filename, 'w') as f: f = tree.export_graphviz(clf, out_file=f)
 
     # build different trees depending on max_leaf_nodes
     for i in range(2, max_node_count):
@@ -138,22 +138,22 @@ def analyse_performance_with_noise(X_train, X_test, y_train, y_test):
 
     # generate chart
     #plt.plot(performanceX, performance_train_without_noise, '', performanceX, performance_test_without_noise, '', performanceX, performance_train_noise_10, '', performanceX, performance_test_noise_10, '', performanceX, performance_train_noise_20, '', performanceX, performance_test_noise_20, '', performanceX, performance_train_noise_30, '', performanceX, performance_test_noise_30, '', performanceX, performance_train_noise_40, '', performanceX, performance_test_noise_40, '', performanceX, performance_train_noise_50, '', performanceX, performance_test_noise_50, '')
-    plt.plot(performanceX, performance_train_without_noise, '', performanceX, performance_test_without_noise, '', performanceX, performance_train_noise_20, '', performanceX, performance_test_noise_20, '', performanceX, performance_train_noise_40, '', performanceX, performance_test_noise_40, '', performanceX, performance_train_noise_50, '', performanceX, performance_test_noise_50, '')
+    plt.plot(performanceX, performance_train_without_noise, '', performanceX, performance_test_without_noise, '', performanceX, performance_train_noise_20, '', performanceX, performance_test_noise_20, '', performanceX, performance_train_noise_50, '', performanceX, performance_test_noise_50, '')
     plt.title('Performance con ruido')
     plt.xlabel('node_count')
     plt.ylabel('score')
     #plt.legend(["train 0% noise","test 0% noise", "train 10% noise","test 10% noise", "train 20% noise","test 20% noise", "train 30% noise","test 30% noise", "train 40% noise","test 40% noise", "train 50% noise","test 50% noise"], loc="upper left")
-    plt.legend(["train 0% noise","test 0% noise", "train 20% noise","test 20% noise", "train 40% noise","test 40% noise", "train 50% noise","test 50% noise"], loc="upper left")
+    plt.legend(["train 0% noise","test 0% noise", "train 20% noise","test 20% noise", "train 50% noise","test 50% noise"], loc="upper left")
     plt.show()
         
 
 if __name__ == "__main__":
 
     X,y = load_data() 
-    #analyze_base_tree(X,y) 
+    analyze_base_tree(X,y) 
     X_train, X_test, y_train, y_test = split_sample_in_train_and_test(X, y)
     print "Train set: ", X_train.shape, y_train.shape
     print "Test set:", X_test.shape, y_test.shape
-    #analyze_base_tree(X_train,y_train)
-    #analyse_performance(X_train, X_test, y_train, y_test)
+    analyze_base_tree(X_train,y_train)
+    analyse_performance(X_train, X_test, y_train, y_test)
     analyse_performance_with_noise(X_train, X_test, y_train, y_test)
